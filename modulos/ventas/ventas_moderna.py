@@ -1351,7 +1351,7 @@ class VentasModerna(tk.Frame):
         
         ticket = f"""
 {'='*40}
-           🏪 MI TIENDA
+           🏪 EL GOLOSO
          SISTEMA DE VENTAS
 {'='*40}
 
@@ -1445,7 +1445,7 @@ ID Venta: {venta_id}
         
         # Obtener datos de la empresa desde la configuración
         from modulos.configuracion.gestor_configuracion import obtener_configuracion
-        nombre_empresa = obtener_configuracion('nombre_empresa', 'Mi Tienda')
+        nombre_empresa = obtener_configuracion('nombre_empresa', 'El Goloso')
         direccion_empresa = obtener_configuracion('direccion_empresa', 'Caracas, Venezuela')
         rif_empresa = obtener_configuracion('rif_empresa', 'J-00000000-0')
         telefono_empresa = obtener_configuracion('telefono_empresa', '+58-212-1234567')

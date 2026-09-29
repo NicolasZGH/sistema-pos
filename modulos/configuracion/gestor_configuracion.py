@@ -42,7 +42,7 @@ class GestorConfiguracion:
                 ('simbolo_ves', 'Bs.', 'Símbolo para Bolívares'),
                 ('simbolo_usd', '$', 'Símbolo para Dólares'),
                 ('mostrar_ambas_monedas', '1', 'Mostrar precios en ambas monedas (1=Sí, 0=No)'),
-                ('nombre_empresa', 'Mi Tienda', 'Nombre de la empresa'),
+                ('nombre_empresa', 'El Goloso', 'Nombre de la empresa'),
                 ('direccion_empresa', 'Caracas, Venezuela', 'Dirección de la empresa'),
                 ('telefono_empresa', '+58-212-1234567', 'Teléfono de la empresa'),
                 ('rif_empresa', 'J-00000000-0', 'RIF de la empresa')
@@ -705,7 +705,7 @@ class GestorConfiguracion:
             configs = dict(cursor.fetchall())
             
             self.nombre_empresa.delete(0, 'end')
-            self.nombre_empresa.insert(0, configs.get('nombre_empresa', 'Mi Tienda'))
+            self.nombre_empresa.insert(0, configs.get('nombre_empresa', 'El Goloso'))
             
             self.direccion_empresa.delete(0, 'end')
             self.direccion_empresa.insert(0, configs.get('direccion_empresa', 'Caracas, Venezuela'))
