@@ -38,11 +38,9 @@ class VentasModerna(tk.Frame):
         self.setup_styles()
         self.widgets_modernos()
         self.timer_producto = None
-        self.timer_cliente = None
         
         # Cargar datos después de crear widgets
         self.cargar_productos()
-        self.cargar_clientes()
         
         # Iniciar actualización de hora en tiempo real
         self.actualizar_hora()
@@ -144,91 +142,85 @@ class VentasModerna(tk.Frame):
         content_frame = tk.Frame(self, bg=self.COLORS['light'])
         content_frame.pack(fill='both', expand=True, padx=20, pady=20)
         
-        # Frame de información del cliente y producto (aún más ancho)
+# Frame de información del producto
         info_frame = self.crear_frame_moderno(content_frame, "📋 Información de Venta", 
-                                            0, 0, 1350, 220)  # Aumentado de 1320 a 1350 y altura de 200 a 220
-        
-        # Cliente
-        tk.Label(info_frame, text="👤 Cliente:", 
-                font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                fg=self.COLORS['primary']).place(x=10, y=20)
-        
-        self.entry_cliente = ttk.Combobox(info_frame, font=('Segoe UI', 11), style='Modern.TCombobox')
-        self.entry_cliente.place(x=120, y=18, width=280, height=35)
-        self.entry_cliente.bind('<KeyRelease>', self.filtrar_clientes)
-        
-        # Código de barras (movido más a la derecha)
+                                            0, 0, 1350, 220)
+
+        # ─────────── Fila 1: Código de barras, Producto, Cantidad ───────────
+
+        # Código de barras
         tk.Label(info_frame, text="📊 Código de Barras:", 
                 font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                fg=self.COLORS['primary']).place(x=10, y=70)
-        
+                fg=self.COLORS['primary']).place(x=20, y=20)
+
         self.entry_codigo = ttk.Entry(info_frame, font=('Segoe UI', 11), style='Modern.TEntry')
-        self.entry_codigo.place(x=170, y=68, width=220, height=35)  # Movido de x=150 a x=170, ancho de 200 a 220
+        self.entry_codigo.place(x=180, y=18, width=220, height=35)
         self.entry_codigo.bind('<KeyRelease>', self.buscar_por_codigo)
         self.entry_codigo.bind('<Return>', self.buscar_por_codigo)
-        
-        # Producto (ajustado para el nuevo espacio)
+
+        # Producto
         tk.Label(info_frame, text="📦 Producto:", 
                 font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                fg=self.COLORS['primary']).place(x=410, y=70)
-        
-        self.entry_producto = ttk.Combobox(info_frame, font=('Segoe UI', 11), style='Modern.TCombobox', state='normal')
-        self.entry_producto.place(x=510, y=68, width=230, height=35)  # Ajustado x=510, width=230
-        
-        # Eventos simplificados para evitar colgarse
+                fg=self.COLORS['primary']).place(x=420, y=20)
+
+        self.entry_producto = ttk.Combobox(info_frame, font=('Segoe UI', 11), 
+                                        style='Modern.TCombobox', state='normal')
+        self.entry_producto.place(x=530, y=18, width=280, height=35)
         self.entry_producto.bind("<<ComboboxSelected>>", self.actualizar_stock)
         self.entry_producto.bind('<Button-1>', self.mostrar_productos)
         self.entry_producto.bind('<Return>', self.actualizar_stock)
-        
-        # Cantidad (movido más a la derecha)
+
+        # Cantidad
         tk.Label(info_frame, text="🔢 Cantidad:", 
                 font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                fg=self.COLORS['primary']).place(x=450, y=20)
-        
+                fg=self.COLORS['primary']).place(x=830, y=20)
+
         self.entry_cantidad = ttk.Entry(info_frame, font=('Segoe UI', 11), style='Modern.TEntry')
-        self.entry_cantidad.place(x=550, y=18, width=120, height=35)
-        
-        # Stock (ajustado para el nuevo layout)
+        self.entry_cantidad.place(x=940, y=18, width=100, height=35)
+
+        # ─────────── Fila 2: Stock, Factura, Fecha, Hora ───────────
+
+        # Stock
         self.label_stock = tk.Label(info_frame, text="📊 Stock: --", 
-                                   font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                                   fg=self.COLORS['success'])
-        self.label_stock.place(x=760, y=70)
-        
-        # Número de factura (movido más a la derecha)
+                                font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
+                                fg=self.COLORS['success'])
+        self.label_stock.place(x=20, y=80)
+
+        # Número de factura
         tk.Label(info_frame, text="🧾 Factura N°:", 
                 font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                fg=self.COLORS['primary']).place(x=900, y=20)  # Movido de x=750 a x=900
-        
+                fg=self.COLORS['primary']).place(x=250, y=80)
+
         self.label_numero_factura = tk.Label(info_frame, text=f"{self.numero_factura}", 
-                                           font=('Segoe UI', 14, 'bold'), bg=self.COLORS['white'],
-                                           fg=self.COLORS['accent'])
-        self.label_numero_factura.place(x=1030, y=18)  # Movido de x=880 a x=1030
-        
-        # Fecha actual del sistema (más a la derecha)
+                                        font=('Segoe UI', 14, 'bold'), bg=self.COLORS['white'],
+                                        fg=self.COLORS['accent'])
+        self.label_numero_factura.place(x=380, y=78)
+
+        # Fecha
         fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
         tk.Label(info_frame, text="📅 Fecha:", 
                 font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                fg=self.COLORS['primary']).place(x=1150, y=20)
-        
+                fg=self.COLORS['primary']).place(x=500, y=80)
+
         self.label_fecha = tk.Label(info_frame, text=fecha_actual, 
-                                   font=('Segoe UI', 12, 'bold'), bg=self.COLORS['white'],
-                                   fg=self.COLORS['dark'], width=12, anchor='w')
-        self.label_fecha.place(x=1210, y=20, width=100)
-        
-        # Hora actual del sistema (más a la derecha)
+                                font=('Segoe UI', 12, 'bold'), bg=self.COLORS['white'],
+                                fg=self.COLORS['dark'], width=12, anchor='w')
+        self.label_fecha.place(x=580, y=80, width=100)
+
+        # Hora
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         tk.Label(info_frame, text="🕐 Hora:", 
                 font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                fg=self.COLORS['primary']).place(x=1150, y=70)
-        
+                fg=self.COLORS['primary']).place(x=720, y=80)
+
         self.label_hora = tk.Label(info_frame, text=hora_actual, 
-                                  font=('Segoe UI', 12, 'bold'), bg=self.COLORS['white'],
-                                  fg=self.COLORS['dark'], width=12, anchor='w')
-        self.label_hora.place(x=1210, y=70, width=100)
-        
-        # Botón agregar producto (movido un poco a la derecha)
+                                font=('Segoe UI', 12, 'bold'), bg=self.COLORS['white'],
+                                fg=self.COLORS['dark'], width=12, anchor='w')
+        self.label_hora.place(x=790, y=80, width=100)
+
+        # ─────────── Botón Agregar Producto ───────────
         self.crear_boton_moderno(info_frame, "➕ Agregar Producto", 
-                                self.agregar_producto, 'success', 950, 60, 180, 40)  # Movido de x=900 a x=950 (solo 50px)
+                                self.agregar_producto, 'success', 940, 75, 200, 40)
         
         # Frame de productos seleccionados (más ancho y máxima altura)
         productos_frame = self.crear_frame_moderno(content_frame, "🛒 Productos Seleccionados", 
@@ -426,70 +418,6 @@ class VentasModerna(tk.Frame):
         
         print("🏁 CARGA DE PRODUCTOS FINALIZADA")
 
-    def cargar_clientes(self):
-        """Cargar clientes desde la base de datos"""
-        try:
-            conn = sqlite3.connect(self.db_name)
-            c = conn.cursor()
-            
-            # Verificar si la tabla clientes existe
-            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='clientes'")
-            if not c.fetchone():
-                # Si no existe, crear algunos clientes de ejemplo
-                c.execute('''CREATE TABLE IF NOT EXISTS clientes 
-                           (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            nombre TEXT NOT NULL,
-                            email TEXT,
-                            telefono TEXT)''')
-                
-                # Insertar clientes de ejemplo
-                clientes_ejemplo = [
-                    ("Cliente Ejemplo 1", "cliente1@email.com", "123-456-7890"),
-                    ("Cliente Ejemplo 2", "cliente2@email.com", "123-456-7891"),
-                    ("Cliente Ejemplo 3", "cliente3@email.com", "123-456-7892"),
-                    ("Cliente General", "general@tienda.com", "123-456-0000")
-                ]
-                
-                c.executemany("INSERT INTO clientes (nombre, email, telefono) VALUES (?, ?, ?)", 
-                             clientes_ejemplo)
-                conn.commit()
-                print("Clientes de ejemplo creados")
-            
-            # Cargar clientes
-            c.execute("SELECT nombre FROM clientes")
-            clientes = c.fetchall()
-            self.clientes = [cliente[0] for cliente in clientes]
-            
-            if self.clientes:
-                self.entry_cliente['values'] = self.clientes
-                print(f"Cargados {len(self.clientes)} clientes")
-            else:
-                self.clientes = ["Cliente General"]
-                self.entry_cliente['values'] = self.clientes
-                print("No se encontraron clientes")
-                
-            conn.close()
-        except sqlite3.Error as e:
-            print(f"Error cargando clientes: {e}")
-            # Cliente por defecto en caso de error
-            self.clientes = ["Cliente General"]
-            self.entry_cliente['values'] = self.clientes
-
-    def filtrar_clientes(self, event):
-        """Filtrar clientes mientras se escribe"""
-        if self.timer_cliente: 
-            self.timer_cliente.cancel()
-        self.timer_cliente = threading.Timer(0.5, self._filter_clientes)
-        self.timer_cliente.start()
-
-    def _filter_clientes(self):
-        """Aplicar filtro de clientes"""
-        texto = self.entry_cliente.get().lower()
-        if texto:
-            clientes_filtrados = [c for c in self.clientes if texto in c.lower()]
-            self.entry_cliente['values'] = clientes_filtrados
-        else:
-            self.entry_cliente['values'] = self.clientes
 
     def filtrar_productos(self, event):
         """Filtrar productos mientras se escribe con autocompletado mejorado"""
@@ -672,11 +600,6 @@ class VentasModerna(tk.Frame):
             messagebox.showwarning("Advertencia", "No hay productos en la venta")
             return
         
-        cliente = self.entry_cliente.get()
-        if not cliente:
-            messagebox.showwarning("Advertencia", "Por favor seleccione un cliente")
-            return
-        
         try:
             # Aquí iría la lógica de pago
             messagebox.showinfo("Éxito", "¡Venta realizada con éxito!")
@@ -796,12 +719,11 @@ class VentasModerna(tk.Frame):
         tree_frame.pack(fill='both', expand=True)
         
         # Treeview para mostrar ventas
-        columns = ("Factura", "Cliente", "Producto", "Precio", "Cantidad", "Total", "Fecha", "Hora")
+        columns = ("Factura", "Producto", "Precio", "Cantidad", "Total", "Fecha", "Hora")
         self.tree_ventas = ttk.Treeview(tree_frame, columns=columns, show="headings", height=20)
-        
-        # Configurar columnas con anchos específicos
-        anchos = {"Factura": 80, "Cliente": 150, "Producto": 200, "Precio": 100, 
-                 "Cantidad": 80, "Total": 100, "Fecha": 100, "Hora": 80}
+
+        anchos = {"Factura": 80, "Producto": 250, "Precio": 100, 
+                "Cantidad": 80, "Total": 100, "Fecha": 100, "Hora": 80}
         
         for col in columns:
             self.tree_ventas.heading(col, text=col)
@@ -835,9 +757,9 @@ class VentasModerna(tk.Frame):
             c = conn.cursor()
             
             # Convertir fechas para comparación
-            c.execute("""SELECT factura, cliente, articulo, precio, cantidad, total, fecha, hora 
-                        FROM ventas WHERE fecha BETWEEN ? AND ? 
-                        ORDER BY fecha DESC, hora DESC""", (fecha_desde, fecha_hasta))
+            c.execute("""SELECT factura, articulo, precio, cantidad, total, fecha, hora 
+            FROM ventas WHERE fecha BETWEEN ? AND ? 
+            ORDER BY fecha DESC, hora DESC""", (fecha_desde, fecha_hasta))
             ventas = c.fetchall()
             conn.close()
             
@@ -902,8 +824,8 @@ class VentasModerna(tk.Frame):
         try:
             conn = sqlite3.connect(self.db_name)
             c = conn.cursor()
-            c.execute("""SELECT factura, cliente, articulo, precio, cantidad, total, fecha, hora 
-                        FROM ventas ORDER BY fecha DESC, hora DESC LIMIT 500""")
+            c.execute("""SELECT factura, articulo, precio, cantidad, total, fecha, hora 
+            FROM ventas ORDER BY fecha DESC, hora DESC LIMIT 500""")
             ventas = c.fetchall()
             conn.close()
             
@@ -925,13 +847,12 @@ class VentasModerna(tk.Frame):
         
         # Insertar datos
         for venta in ventas:
-            factura, cliente, producto, precio, cantidad, total, fecha, hora = venta
+            factura, producto, precio, cantidad, total, fecha, hora = venta
             total_dia += total
             
             # Formatear datos para mostrar
             venta_formateada = [
                 factura,
-                cliente,
                 producto,
                 f"${precio:,.2f}",
                 cantidad,
@@ -1086,11 +1007,6 @@ class VentasModerna(tk.Frame):
             messagebox.showwarning("Advertencia", "No hay productos en la venta")
             return
         
-        cliente = self.entry_cliente.get()
-        if not cliente:
-            messagebox.showwarning("Advertencia", "Por favor seleccione un cliente")
-            return
-        
         # Calcular total
         subtotal = sum(p['total'] for p in self.productos_seleccionados)
         iva = subtotal * 0.19
@@ -1129,9 +1045,6 @@ class VentasModerna(tk.Frame):
         info_frame = tk.Frame(content_frame, bg=self.COLORS['white'], relief='solid', bd=1)
         info_frame.pack(fill='x', pady=(0, 20))
         
-        tk.Label(info_frame, text=f"Cliente: {cliente}", 
-                font=('Segoe UI', 12, 'bold'), bg=self.COLORS['white'],
-                fg=self.COLORS['primary']).pack(pady=5)
         
         tk.Label(info_frame, text=f"Subtotal: ${subtotal:,.2f}", 
                 font=('Segoe UI', 11), bg=self.COLORS['white'],
@@ -1285,7 +1198,6 @@ class VentasModerna(tk.Frame):
                 CREATE TABLE IF NOT EXISTS ventas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     numero_factura INTEGER,
-                    cliente TEXT,
                     fecha TEXT,
                     hora TEXT,
                     subtotal REAL,
@@ -1311,7 +1223,6 @@ class VentasModerna(tk.Frame):
             ''')
             
             # Obtener datos de la venta
-            cliente = self.entry_cliente.get() or "Cliente General"
             # Usar el mismo formato que los filtros del historial (dd/mm/YYYY)
             fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
             hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
@@ -1324,7 +1235,6 @@ class VentasModerna(tk.Frame):
             # Debug: Mostrar datos antes de insertar
             print(f"🔍 DATOS A INSERTAR:")
             print(f"  - Factura: {numero_factura}")
-            print(f"  - Cliente: {cliente}")
             print(f"  - Fecha: {fecha_actual}")
             print(f"  - Hora: {hora_actual}")
             print(f"  - Subtotal: {subtotal}")
@@ -1336,9 +1246,9 @@ class VentasModerna(tk.Frame):
             # Insertar venta principal
             try:
                 c.execute('''
-                    INSERT INTO ventas (numero_factura, cliente, fecha, hora, subtotal, iva, total, monto_recibido, cambio)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (numero_factura, cliente, fecha_actual, hora_actual, subtotal, iva, total, monto_recibido, cambio))
+            INSERT INTO ventas (numero_factura, fecha, hora, subtotal, iva, total, monto_recibido, cambio)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (numero_factura, fecha_actual, hora_actual, subtotal, iva, total, monto_recibido, cambio))
                 
                 venta_id = c.lastrowid
                 print(f"✅ Venta insertada con ID: {venta_id}")
@@ -1349,9 +1259,9 @@ class VentasModerna(tk.Frame):
                 print("🔄 Intentando con estructura de tabla antigua...")
                 try:
                     c.execute('''
-                        INSERT INTO ventas (factura, cliente, articulo, precio, cantidad, total, fecha, hora, costo)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ''', (numero_factura, cliente, "Venta Multiple", total, 1, total, fecha_actual, hora_actual, total * 0.8))
+    INSERT INTO ventas (factura, articulo, precio, cantidad, total, fecha, hora, costo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+''', (numero_factura, "Venta Multiple", total, 1, total, fecha_actual, hora_actual, total * 0.8))
                     venta_id = c.lastrowid
                     print(f"✅ Venta insertada con estructura antigua, ID: {venta_id}")
                 except sqlite3.Error as e2:
@@ -1436,7 +1346,6 @@ class VentasModerna(tk.Frame):
     
     def generar_contenido_ticket(self, venta_id, total, monto_recibido, cambio):
         """Generar contenido del ticket de venta"""
-        cliente = self.entry_cliente.get() or "Cliente General"
         fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         
@@ -1449,7 +1358,6 @@ class VentasModerna(tk.Frame):
 Factura N°: {self.numero_factura}
 Fecha: {fecha_actual}
 Hora: {hora_actual}
-Cliente: {cliente}
 
 {'='*40}
 PRODUCTOS
@@ -1532,7 +1440,6 @@ ID Venta: {venta_id}
     
     def generar_factura_fiscal(self, venta_id, total, monto_recibido, cambio):
         """Generar formato de factura fiscal"""
-        cliente = self.entry_cliente.get() or "Cliente General"
         fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         
@@ -1557,7 +1464,6 @@ FECHA: {fecha_actual}
 HORA: {hora_actual}
 CAJERO: Sistema POS
 
-CLIENTE: {cliente}
 {'='*50}
 
 DESCRIPCIÓN                QTY    P.UNIT    TOTAL
