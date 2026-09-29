@@ -442,5 +442,6 @@ TOTAL GENERAL: ${total_ventas:.2f}
         reporte += "   ESTADO DEL INVENTARIO\n"
         reporte += "="*60 + "\n"
         reporte += self.reporte_inventario()
+
         
         return reporte

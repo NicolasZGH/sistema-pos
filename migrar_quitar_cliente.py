@@ -14,7 +14,7 @@ cursor = conn.cursor()
 
 print("\nMigrando tabla 'ventas'...")
 
-# 3. Desactivar foreign keys temporalmente (por seguridad)
+# 3. Desactivar foreign keys temporalmente
 cursor.execute("PRAGMA foreign_keys=OFF")
 
 # 4. Renombrar la tabla actual
@@ -65,4 +65,4 @@ cursor.execute("SELECT COUNT(*) FROM ventas")
 print(f"\nTotal de ventas conservadas: {cursor.fetchone()[0]}")
 
 conn.close()
-print("\n✅ Migración completada exitosamente.")
+print("\nMigracion completada exitosamente.")
