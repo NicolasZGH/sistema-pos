@@ -443,8 +443,4 @@ TOTAL GENERAL: ${total_ventas:.2f}
         reporte += "="*60 + "\n"
         reporte += self.reporte_inventario()
         
-        reporte += "\n\n3️⃣ " + "="*60 + "\n"
-        reporte += "   CLIENTES REGISTRADOS\n"
-        reporte += "="*60 + "\n"
-        
         return reporte
