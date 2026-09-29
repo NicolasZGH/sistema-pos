@@ -224,7 +224,7 @@ class PedidosModerno(tk.Frame):
         self.tree = ttk.Treeview(table_frame, 
                                 yscrollcommand=scrollbar_y.set, 
                                 xscrollcommand=scrollbar_x.set,
-                                columns=("ID", "Cliente", "Fecha", "Estado", "Total", "Observaciones"), 
+                                columns=("ID", "Proveedor", "Fecha", "Estado", "Total", "Observaciones"),
                                 show="headings",
                                 height=30)
 
@@ -235,7 +235,7 @@ class PedidosModerno(tk.Frame):
 
         # Configurar encabezados
         self.tree.heading("ID", text="🆔 ID")
-        self.tree.heading("Cliente", text="🏢 Proveedor")
+        self.tree.heading("Proveedor", text="🏢 Proveedor")
         self.tree.heading("Fecha", text="📅 Fecha")
         self.tree.heading("Estado", text="📊 Estado")
         self.tree.heading("Total", text="💰 Total")
@@ -243,7 +243,7 @@ class PedidosModerno(tk.Frame):
 
         # Configurar columnas
         self.tree.column("ID", width=60, anchor="center")
-        self.tree.column("Cliente", width=150, anchor="w")
+        self.tree.column("Proveedor", width=150, anchor="w")
         self.tree.column("Fecha", width=120, anchor="center")
         self.tree.column("Estado", width=100, anchor="center")
         self.tree.column("Total", width=100, anchor="e")
@@ -335,7 +335,7 @@ class PedidosModerno(tk.Frame):
                 total_formateado = f"${row[4]:.2f}"
                 row_formateada = list(row)
                 row_formateada[4] = total_formateado
-                self.tree.insert("", "end", values=row_formateada)
+                self.tree.insert("", "end", values=(id, cliente, fecha, estado, total, obs))
             
             if hasattr(self, 'stats_label'):
                 self.stats_label.config(text=f"Total pedidos: {len(rows)}")

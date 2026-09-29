@@ -53,8 +53,7 @@ class GeneradorReportes:
         
         self.tipo_reporte = ttk.Combobox(options_frame, font=('Segoe UI', 11), 
                                         values=["Ventas Diarias", "Ventas por Período", 
-                                               "Inventario Actual", "Productos Más Vendidos",
-                                               "Clientes Registrados", "Proveedores",
+                                               "Inventario Actual", "Productos Más Vendidos", "Proveedores",
                                                "Reporte Completo"], 
                                         state="readonly", width=25)
         self.tipo_reporte.set("Ventas Diarias")
@@ -156,8 +155,6 @@ class GeneradorReportes:
                 contenido = self.reporte_inventario()
             elif tipo == "Productos Más Vendidos":
                 contenido = self.reporte_productos_vendidos()
-            elif tipo == "Clientes Registrados":
-                contenido = self.reporte_clientes()
             elif tipo == "Proveedores":
                 contenido = self.reporte_proveedores()
             elif tipo == "Reporte Completo":
@@ -181,8 +178,8 @@ class GeneradorReportes:
             cursor.execute("SELECT * FROM ventas WHERE fecha = ?", (fecha,))
             ventas = cursor.fetchall()
             
-            total_ventas = sum(venta[6] for venta in ventas)  # total
-            total_cantidad = sum(venta[5] for venta in ventas)  # cantidad
+            total_ventas = sum(venta[5] for venta in ventas)  # total
+            total_cantidad = sum(venta[4] for venta in ventas)  # cantidad
             
             reporte = f"""
 ╔══════════════════════════════════════════════════════════════╗
@@ -201,12 +198,12 @@ class GeneradorReportes:
 
 📋 DETALLE DE VENTAS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{'Factura':<10} {'Cliente':<20} {'Producto':<25} {'Cant':<6} {'Precio':<10} {'Total':<10}
-{'-'*10} {'-'*20} {'-'*25} {'-'*6} {'-'*10} {'-'*10}
+{'Factura':<10} {'Producto':<25} {'Cant':<6} {'Precio':<10} {'Total':<10}
+{'-'*10} {'-'*25} {'-'*6} {'-'*10} {'-'*10}
 """
             
             for venta in ventas:
-                reporte += f"{str(venta[1]):<10} {str(venta[2])[:20]:<20} {str(venta[3])[:25]:<25} {str(venta[5]):<6} ${venta[4]:<9.2f} ${venta[6]:<9.2f}\n"
+                reporte += f"{str(venta[0]):<10} {str(venta[1])[:25]:<25} {str(venta[3]):<6} ${venta[2]:<9.2f} ${venta[4]:<9.2f}\n"
             
             reporte += f"""
 {'-'*88}
@@ -214,8 +211,8 @@ TOTAL GENERAL: ${total_ventas:.2f}
 
 📊 ESTADÍSTICAS ADICIONALES:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Venta Máxima: ${max([v[6] for v in ventas]) if ventas else 0:.2f}
-• Venta Mínima: ${min([v[6] for v in ventas]) if ventas else 0:.2f}
+• Venta Máxima: ${max([v[5] for v in ventas]) if ventas else 0:.2f}
+• Venta Mínima: ${min([v[5] for v in ventas]) if ventas else 0:.2f}
 • Hora de Mayor Actividad: {self.obtener_hora_pico(ventas)}
 
 ═══════════════════════════════════════════════════════════════
@@ -293,47 +290,6 @@ TOTAL GENERAL: ${total_ventas:.2f}
         except Exception as e:
             return f"Error al generar reporte de inventario: {e}"
     
-    def reporte_clientes(self):
-        """Generar reporte de clientes"""
-        try:
-            conn = sqlite3.connect('database.db')
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT * FROM clientes ORDER BY nombre")
-            clientes = cursor.fetchall()
-            
-            reporte = f"""
-╔══════════════════════════════════════════════════════════════╗
-║                    👥 REPORTE DE CLIENTES                     ║
-╠══════════════════════════════════════════════════════════════╣
-║ Generado: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}                     ║
-╚══════════════════════════════════════════════════════════════╝
-
-📈 RESUMEN:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Total de Clientes Registrados: {len(clientes)}
-
-📋 LISTADO DE CLIENTES:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{'ID':<5} {'Nombre':<25} {'Cédula':<15} {'Teléfono':<15} {'Email':<30}
-{'-'*5} {'-'*25} {'-'*15} {'-'*15} {'-'*30}
-"""
-            
-            for cliente in clientes:
-                reporte += f"{cliente[0]:<5} {str(cliente[1])[:25]:<25} {str(cliente[2]):<15} {str(cliente[3]):<15} {str(cliente[5])[:30]:<30}\n"
-            
-            reporte += f"""
-
-═══════════════════════════════════════════════════════════════
-                    Fin del Reporte
-═══════════════════════════════════════════════════════════════
-"""
-            
-            conn.close()
-            return reporte
-            
-        except Exception as e:
-            return f"Error al generar reporte de clientes: {e}"
     
     def obtener_hora_pico(self, ventas):
         """Obtener la hora de mayor actividad"""
@@ -342,8 +298,8 @@ TOTAL GENERAL: ${total_ventas:.2f}
         
         horas = {}
         for venta in ventas:
-            if len(venta) > 8 and venta[8]:  # Si hay campo hora
-                hora = str(venta[8])[:2]  # Primeros 2 caracteres de la hora
+            if len(venta) > 7 and venta[7]:  # Si hay campo hora
+                hora = str(venta[7])[:2]  # Primeros 2 caracteres de la hora
                 horas[hora] = horas.get(hora, 0) + 1
         
         if horas:
@@ -490,6 +446,5 @@ TOTAL GENERAL: ${total_ventas:.2f}
         reporte += "\n\n3️⃣ " + "="*60 + "\n"
         reporte += "   CLIENTES REGISTRADOS\n"
         reporte += "="*60 + "\n"
-        reporte += self.reporte_clientes()
         
         return reporte

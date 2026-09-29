@@ -3,7 +3,6 @@ import tkinter as tk
 import customtkinter as ctk
 from modulos.ventas.ventas_moderna import VentasModerna as Ventas
 from modulos.inventario.inventario_simple import InventarioSimple as Inventario
-from modulos.clientes_moderno import ClientesModerno as Clientes
 from modulos.pedidos_moderno import PedidosModerno as Pedidos
 from modulos.proveedores.proveedor_moderno import ProveedorModerno as Proveedor
 from modulos.informacion.informacion_moderna import InformacionModerna as Informacion
@@ -35,7 +34,7 @@ class Container(tk.Frame):
         self.widgets_modernos()
         
         # Crear los frames de los módulos con estilos modernos
-        for i in (Ventas, Inventario, Clientes, Pedidos, Proveedor, Informacion):
+        for i in (Ventas, Inventario, Pedidos, Proveedor, Informacion):
             frame = i(self)
             self.frames[i] = frame
             frame.pack()
@@ -57,8 +56,6 @@ class Container(tk.Frame):
     def Inventario(self):
         self.show_frames(Inventario)
         
-    def Clientes(self):
-        self.show_frames(Clientes)
         
     def Pedidos(self):
         self.show_frames(Pedidos)
@@ -104,7 +101,6 @@ class Container(tk.Frame):
         button_configs = [
             {"text": "💰 Ventas", "command": self.Ventas, "icon": "venta_icon.png", "module": Ventas},
             {"text": "📦 Inventario", "command": self.Inventario, "icon": "inventario_icon.png", "module": Inventario},
-            {"text": "👥 Clientes", "command": self.Clientes, "icon": "cliente_icon.png", "module": Clientes},
             {"text": "📋 Pedidos", "command": self.Pedidos, "icon": "pedido_icon.png", "module": Pedidos},
             {"text": "🏭 Proveedores", "command": self.Proveedor, "icon": "proveedor_icon.png", "module": Proveedor},
             {"text": "ℹ️ Info", "command": self.Informacion, "icon": "informacion_icon.png", "module": Informacion}

@@ -12,7 +12,7 @@ from modulos.ventas.obtener_numero_factura import obtener_numero_factura_actual
 from modulos.configuracion.gestor_configuracion import obtener_configuracion
 
 
-def generar_factura(total_venta, cliente):
+def generar_factura(total_venta):
         
     numero_factura = obtener_numero_factura_actual()
     productos_seleccionados = []
@@ -67,7 +67,6 @@ def generar_factura(total_venta, cliente):
 
         c.line(50, 540, 550, 540)
             
-        c.drawString(50, 520, f"Cliente: {cliente}")
         c.drawString(50, 500, f"Descripcion de productos:")
 
         y_offset = 480
@@ -81,7 +80,7 @@ def generar_factura(total_venta, cliente):
         y_offset -= 30
         c.setFont("Helvetica", 12)
         for item in productos_seleccionados:
-            factura, cliente, producto, precio, cantidad, total, costo = item
+            factura, producto, precio, cantidad, total, costo = item
             c.drawString(70, y_offset, producto)
             c.drawString(270, y_offset, str(cantidad) )
             c.drawString(370, y_offset, "${:,.0f})".format(precio))
@@ -108,7 +107,7 @@ def generar_factura(total_venta, cliente):
         c.drawString(50, y_offset, "Terminos y Condiciones: ")
         c.drawString(50, y_offset - 20,  "1. Los productos comprados no tienen devolucion.")
         c.drawString(50, y_offset- 40, "2 .  Conserve esta factura como comprobante de su compra")
-        c.drawString(50, y_offset - 60, "3. Para mas informacion visite nuestro sitio web o contacte a servicios al cliente")
+        c.drawString(50, y_offset - 60, "3. Para mas informacion contacte a nuestro equipo de soporte")
 
         c.save()
 

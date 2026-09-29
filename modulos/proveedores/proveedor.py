@@ -151,13 +151,13 @@ class Proveedor(tk.Frame):
                 cursor.execute("""UPDATE proveedores SET empresa = ?, rif = ?, celular = ?, direccion = ?, correo = ? WHERE id = ? """, ( modificar_empresa, modificar_cedula,modificar_celular, modificar_direccion, modificar_correo, id_proveedor))
                 conn.commit()
                 conn.close()
-                messagebox.showinfo("Exito", "Cliente modificado correctamente")
+                messagebox.showinfo("Exito", "Proovedor modificado correctamente")
                 self.limpiar_treeview()
                 self.cargar_registros()
                 top_modificar.destroy()
 
             except sqlite3.Error as e:
-                messagebox.showerror("Error", f"No se pudo modificar el cliente : {e}")
+                messagebox.showerror("Error", f"No se pudo modificar el proovedor : {e}")
 
         btn_guardar = tk.Button(top_modificar,command=guardar_modificado, text="Guardar cambios" , font="sans 14 bold")
         btn_guardar.grid(row=5, column=1, columnspan=2, pady=20)
@@ -180,13 +180,13 @@ class Proveedor(tk.Frame):
             cursor.execute("INSERT INTO proveedores (empresa, rif, celular, direccion, correo) VALUES (?,?,?,?,?)", (empresa, rif, celular, direccion, correo))
             conn.commit()
             conn.close()
-            messagebox.showinfo("Exito", "Cliente registrado correctamente")
+            messagebox.showinfo("Exito", "Proveedor registrado correctamente")
             self.limpiar_treeview()
             self.cargar_registros()
             top_crear.destroy()
 
         except sqlite3.Error as e:
-            messagebox.showerror("Error", f"No se puedo registar el cliente: {e}")
+            messagebox.showerror("Error", f"No se puedo registar el proveedor: {e}")
 
     
     def registrar_ventana_open(self):
