@@ -35,7 +35,7 @@ def generar_factura(total_venta):
    #---------------------------------------------------------------------------
 
         # Obtener datos de la empresa desde la configuración
-        empresa_nombre = obtener_configuracion('nombre_empresa', 'Mi Tienda')
+        empresa_nombre = obtener_configuracion('nombre_empresa', 'El Goloso')
         empresa_direccion = obtener_configuracion('direccion_empresa', 'Caracas, Venezuela')
         empresa_telefono = obtener_configuracion('telefono_empresa', '+58-212-1234567')
         empresa_rif = obtener_configuracion('rif_empresa', 'J-00000000-0')

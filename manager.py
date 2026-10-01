@@ -14,7 +14,7 @@ import os
 class Manager(Tk):
     def __init__(self, *args, **kwargs):
         super(). __init__(*args, **kwargs)
-        self.title("🏪 Mi Tienda - Sistema de Ventas Moderno")
+        self.title("🏪 El Goloso - Sistema de Ventas Moderno")
         self.geometry("1400x900+200+50")  # Ventana más grande y mejor posicionada
         self.resizable(True, True)  # Permitir redimensionar
         self.minsize(1200, 800)  # Tamaño mínimo

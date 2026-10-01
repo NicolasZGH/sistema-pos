@@ -85,7 +85,7 @@ class Container(tk.Frame):
         navbar_frame.place(x=0, y=0, width=1400, height=70)
         
         # Título de la aplicación
-        title_label = tk.Label(navbar_frame, text="🏪 Mi Tienda - Sistema de Ventas", 
+        title_label = tk.Label(navbar_frame, text="🏪 El Goloso - Sistema de Ventas", 
                               bg=estilos.COLORS['primary'], fg=estilos.COLORS['white'],
                               font=('Segoe UI', 18, 'bold'))
         title_label.place(x=20, y=20)
