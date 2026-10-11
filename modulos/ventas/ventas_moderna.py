@@ -221,6 +221,10 @@ class VentasModerna(tk.Frame):
         # ─────────── Botón Agregar Producto ───────────
         self.crear_boton_moderno(info_frame, "➕ Agregar Producto", 
                                 self.agregar_producto, 'success', 940, 75, 200, 40)
+
+        # ─────────── Botón Actualizar (refrescar inventario) ───────────
+        self.crear_boton_moderno(info_frame, "🔄 Actualizar", 
+                                self.recargar_datos, 'secondary', 940, 125, 200, 40)
         
         # Frame de productos seleccionados (más ancho y máxima altura)
         productos_frame = self.crear_frame_moderno(content_frame, "🛒 Productos Seleccionados", 
@@ -355,14 +359,19 @@ class VentasModerna(tk.Frame):
                 conn.commit()
                 print("Artículos de ejemplo creados con códigos de barras")
             
-            # Cargar productos desde la tabla productos primero, luego articulos
-            c.execute("SELECT codigo, nombre, precio, stock FROM productos WHERE stock > 0")
+            # Cargar productos de ambas tablas (articulos primero, luego productos),
+            # combinar sin duplicados para que todo lo agregado aparezca en el combobox
+            c.execute("SELECT codigo, articulo, precio, stock FROM articulos WHERE stock > 0 AND estado = 'activo'")
             productos_data = c.fetchall()
             
-            # Si no hay productos en la tabla productos, usar articulos
-            if not productos_data:
-                c.execute("SELECT codigo, articulo, precio, stock FROM articulos WHERE stock > 0 AND estado = 'activo'")
-                productos_data = c.fetchall()
+            try:
+                c.execute("SELECT codigo, nombre, precio, stock FROM productos WHERE stock > 0")
+                codigos_vistos = {p[0] for p in productos_data if p[0]}
+                for codigo, nombre, precio, stock in c.fetchall():
+                    if codigo and codigo not in codigos_vistos:
+                        productos_data.append((codigo, nombre, precio, stock))
+            except sqlite3.Error:
+                pass
             
             print(f"🔍 Productos encontrados: {len(productos_data)}")
             
@@ -418,6 +427,20 @@ class VentasModerna(tk.Frame):
         
         print("🏁 CARGA DE PRODUCTOS FINALIZADA")
 
+    def recargar_datos(self, mostrar_mensaje=True):
+        """Refrescar la página: recargar productos del inventario para
+        ver las nuevas actualizaciones (productos recién agregados)."""
+        self.cargar_productos()
+        self.entry_producto.delete(0, tk.END)
+        self.entry_codigo.delete(0, tk.END)
+        self.entry_cantidad.delete(0, tk.END)
+        total = len(getattr(self, 'productos_nombres', []))
+        self.label_stock.config(text=f"🔄 Inventario actualizado: {total} productos",
+                                fg=self.COLORS['secondary'])
+        if mostrar_mensaje:
+            messagebox.showinfo("🔄 Actualizado",
+                                f"Información de venta actualizada correctamente.\n"
+                                f"{total} productos disponibles ahora.")
 
     def filtrar_productos(self, event):
         """Filtrar productos mientras se escribe con autocompletado mejorado"""

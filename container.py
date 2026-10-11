@@ -47,6 +47,10 @@ class Container(tk.Frame):
         frame = self.frames[container]
         frame.tkraise()
         
+        # Refrescar datos al entrar a Ventas para ver productos recién agregados
+        if container is Ventas and hasattr(frame, 'recargar_datos'):
+            frame.recargar_datos(mostrar_mensaje=False)
+        
         # Actualizar el color del botón activo
         self.actualizar_boton_activo(container) 
         

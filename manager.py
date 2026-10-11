@@ -10,6 +10,39 @@ from modulos.utils.estilos_modernos import estilos
 
 import sys
 import os
+import shutil
+import sqlite3
+
+
+def _base_tiene_usuarios(ruta):
+    try:
+        conn = sqlite3.connect(ruta)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM usuarios")
+        total = cursor.fetchone()[0]
+        conn.close()
+        return total > 0
+    except sqlite3.Error:
+        return False
+
+
+def configurar_entorno_frozen():
+    """En el .exe: usar siempre la carpeta del ejecutable como cwd y
+    garantizar una database.db con usuarios (sembrada desde el bundle)."""
+    if not getattr(sys, 'frozen', False):
+        return
+
+    base = os.path.dirname(sys.executable)
+    os.chdir(base)
+
+    destino = os.path.join(base, 'database.db')
+    if os.path.exists(destino) and _base_tiene_usuarios(destino):
+        return
+
+    origen = os.path.join(getattr(sys, '_MEIPASS', base), 'database.db')
+    if os.path.exists(origen):
+        shutil.copy(origen, destino)
+
 
 class Manager(Tk):
     def __init__(self, *args, **kwargs):
@@ -103,6 +136,9 @@ class Manager(Tk):
 
 def main():
     """Función principal que maneja el flujo de login y aplicación"""
+    # En el .exe, fijar cwd y asegurar la base de datos con usuarios
+    configurar_entorno_frozen()
+
     # Crear base de datos primero
     crear_base_de_datos()
     
