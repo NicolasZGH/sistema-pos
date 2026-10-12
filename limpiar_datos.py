@@ -8,9 +8,8 @@ print("  LIMPIEZA DE DATOS DE PRUEBA")
 print("=" * 55)
 
 tablas_a_vaciar = [
-    'ventas', 'detalle_ventas', 'clientes', 'proveedores',
-    'articulos', 'productos', 'pedidos', 'pedidos_proveedor',
-    'pedidos_detalle', 'historial_actividades',
+    'ventas', 'detalle_ventas', 'clientes', 'articulos', 'productos',
+    'historial_actividades',
 ]
 
 print("\nVaciando tablas de negocio...")

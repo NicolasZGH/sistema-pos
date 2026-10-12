@@ -367,7 +367,7 @@ class Inventario(tk.Frame):
         entry_precio.insert(0,str(precio) + " $")
         entry_precio.config(justify="center")
         
-        tk.Label(top, text="Costo proveedor", font="arial 12 bold", bg=estilos.COLORS['bg_primary']).place(x=20, y=100, width=130, height=25)
+        tk.Label(top, text="Costo", font="arial 12 bold", bg=estilos.COLORS['bg_primary']).place(x=20, y=100, width=130, height=25)
         entry_costo = ttk.Entry(top, font='arial 12 bold')
         entry_costo.place(x=160, y=100, width=250, height=30)
         entry_costo.insert(0, str(costo) + " $")

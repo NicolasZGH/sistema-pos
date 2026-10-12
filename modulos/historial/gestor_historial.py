@@ -107,7 +107,7 @@ class GestorHistorial:
         
         self.modulo_filtro = ttk.Combobox(filter_row1, font=('Segoe UI', 10), 
                                          values=["Todos", "Ventas", "Inventario", 
-                                                "Pedidos", "Proveedores", "Sistema", "Login"], 
+                                                "Sistema", "Login"], 
                                          state="readonly", width=15)
         self.modulo_filtro.set("Todos")
         self.modulo_filtro.pack(side='left', padx=(0, 20))

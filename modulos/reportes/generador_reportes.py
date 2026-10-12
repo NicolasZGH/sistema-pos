@@ -53,7 +53,7 @@ class GeneradorReportes:
         
         self.tipo_reporte = ttk.Combobox(options_frame, font=('Segoe UI', 11), 
                                         values=["Ventas Diarias", "Ventas por Período", 
-                                               "Inventario Actual", "Productos Más Vendidos", "Proveedores",
+                                               "Inventario Actual", "Productos Más Vendidos",
                                                "Reporte Completo"], 
                                         state="readonly", width=25)
         self.tipo_reporte.set("Ventas Diarias")
@@ -155,8 +155,6 @@ class GeneradorReportes:
                 contenido = self.reporte_inventario()
             elif tipo == "Productos Más Vendidos":
                 contenido = self.reporte_productos_vendidos()
-            elif tipo == "Proveedores":
-                contenido = self.reporte_proveedores()
             elif tipo == "Reporte Completo":
                 contenido = self.reporte_completo()
             else:
@@ -376,48 +374,6 @@ TOTAL GENERAL: ${total_ventas:.2f}
                 subprocess.run(['xdg-open', filename])
         except Exception as e:
             messagebox.showerror("❌ Error", f"Error al abrir archivo: {e}")
-    
-    def reporte_proveedores(self):
-        """Generar reporte de proveedores"""
-        try:
-            conn = sqlite3.connect('database.db')
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT * FROM proveedores ORDER BY empresa")
-            proveedores = cursor.fetchall()
-            
-            reporte = f"""
-╔══════════════════════════════════════════════════════════════╗
-║                    🏢 REPORTE DE PROVEEDORES                  ║
-╠══════════════════════════════════════════════════════════════╣
-║ Generado: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}                     ║
-╚══════════════════════════════════════════════════════════════╝
-
-📈 RESUMEN:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Total de Proveedores: {len(proveedores)}
-
-📋 LISTADO DE PROVEEDORES:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{'ID':<5} {'Empresa':<30} {'RIF':<15} {'Teléfono':<15} {'Email':<25}
-{'-'*5} {'-'*30} {'-'*15} {'-'*15} {'-'*25}
-"""
-            
-            for proveedor in proveedores:
-                reporte += f"{proveedor[0]:<5} {str(proveedor[1])[:30]:<30} {str(proveedor[2]):<15} {str(proveedor[3]):<15} {str(proveedor[5])[:25]:<25}\n"
-            
-            reporte += f"""
-
-═══════════════════════════════════════════════════════════════
-                    Fin del Reporte
-═══════════════════════════════════════════════════════════════
-"""
-            
-            conn.close()
-            return reporte
-            
-        except Exception as e:
-            return f"Error al generar reporte de proveedores: {e}"
     
     def reporte_completo(self):
         """Generar reporte completo del sistema"""

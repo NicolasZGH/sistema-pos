@@ -611,7 +611,6 @@ class VentasModerna(tk.Frame):
         for item in self.tree_productos.get_children():
             self.tree_productos.delete(item)
         
-        self.entry_cliente.set("")
         self.entry_producto.set("")
         self.entry_cantidad.delete(0, tk.END)
         self.label_stock.config(text="📊 Stock: --")

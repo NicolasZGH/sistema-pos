@@ -296,15 +296,10 @@ Fecha: {datetime.now().strftime('%Y-%m-%d')}"""
             cursor.execute("SELECT COUNT(*) FROM productos")
             total_productos = cursor.fetchone()[0]
             
-            
-            # Contar pedidos
-            cursor.execute("SELECT COUNT(*) FROM pedidos_proveedor")
-            total_pedidos = cursor.fetchone()[0]
-            
             conn.close()
             
             # Mostrar estadísticas
-            stats_text = f"📦 Productos: {total_productos}\n📋 Pedidos: {total_pedidos}"
+            stats_text = f"📦 Productos: {total_productos}"
             
             stats_label = tk.Label(self.stats_frame, text=stats_text, 
                                   font=('Segoe UI', 10, 'bold'), 
@@ -399,7 +394,6 @@ Fecha: {datetime.now().strftime('%Y-%m-%d')}"""
 
 ✨ Características:
 • Gestión de inventario
-• Pedidos a proveedores
 • Interfaz moderna y responsive
 • Actualización automática de stock
 

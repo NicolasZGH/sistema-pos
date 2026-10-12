@@ -287,7 +287,7 @@ class Inventario(tk.Frame):
         precio_label = tk.Label(article_frame, text=f'precio: ${precio:.2f}', bg='white', anchor='w', wraplength=150, font='arial 8 bold' ) 
         precio_label.pack(side="bottom", fill='x')
         
-        codigo_label = tk.Label(article_frame, text=f'Código: {codigo}', bg='white', anchor='w', wraplength=150, font='arial 8' )
+        codigo_label = tk.Label(article_frame, text=f'Cï¿½digo: {codigo}', bg='white', anchor='w', wraplength=150, font='arial 8' )
         codigo_label.pack(side="bottom", fill='x')
         
         self.column += 1
@@ -404,7 +404,7 @@ class Inventario(tk.Frame):
         entry_precio.insert(0,str(precio) + " $")
         entry_precio.config(justify="center")
         
-        tk.Label(top, text="Costo proveedor", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=100, width=130, height=25)
+        tk.Label(top, text="Costo", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=100, width=130, height=25)
         entry_costo = ttk.Entry(top, font='arial 12 bold')
         entry_costo.place(x=160, y=100, width=250, height=30)
         entry_costo.insert(0, str(costo) + " $")
