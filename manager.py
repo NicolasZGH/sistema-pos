@@ -48,10 +48,20 @@ class Manager(Tk):
     def __init__(self, *args, **kwargs):
         super(). __init__(*args, **kwargs)
         self.title("🏪 El Goloso - Sistema de Ventas Moderno")
-        self.geometry("1400x900+200+50")  # Ventana más grande y mejor posicionada
         self.resizable(True, True)  # Permitir redimensionar
-        self.minsize(1200, 800)  # Tamaño mínimo
-        
+
+        # Adaptar la ventana al tamaño de la pantalla y centrarla.
+        # En pantallas pequeñas el contenido es alcanzable mediante scroll.
+        self.update_idletasks()
+        screen_w = self.winfo_screenwidth()
+        screen_h = self.winfo_screenheight()
+        ancho = min(1400, screen_w - 40)
+        alto = min(900, screen_h - 80)
+        x = max(0, (screen_w - ancho) // 2)
+        y = max(0, (screen_h - alto) // 2)
+        self.geometry(f"{ancho}x{alto}+{x}+{y}")
+        self.minsize(min(1000, ancho), min(600, alto))  # Tamaño mínimo razonable
+
         # Aplicar colores modernos de fondo
         self.configure(bg=estilos.COLORS['bg_primary'])
         
