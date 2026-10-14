@@ -74,11 +74,8 @@ class Inventario(tk.Frame):
         # self.label3 = tk.Label(lblframe_seleccion, text='Costo-proveedor: ',font="arial 12 bold", bg='#C6D9E3')
         # self.label3.place(x=5,y=70)
         
-        self.label4 = tk.Label(lblframe_seleccion, text='Stock: ',font="arial 12 bold", bg='#C6D9E3')
-        self.label4.place(x=5,y=70)
-        
         self.label5 = tk.Label(lblframe_seleccion, text='Estado: ',font="arial 12 bold", bg='#C6D9E3')
-        self.label5.place(x=5,y=100)
+        self.label5.place(x=5,y=70)
         
         #---------------------------------------------------------------------------------
          
@@ -179,13 +176,9 @@ class Inventario(tk.Frame):
         entry_costo = ttk.Entry(top,  font="arial 12 bold" )
         entry_costo.place(x=120, y=100, width=250, height=30)
         
-        tk.Label(top, text="Stock:", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=140, width=80, height=25)
-        entry_stock = ttk.Entry(top,  font="arial 12 bold" )
-        entry_stock.place(x=120, y=140, width=250, height=30)
-        
-        tk.Label(top, text="Estado:", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=180, width=80, height=25)
+        tk.Label(top, text="Estado:", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=140, width=80, height=25)
         entry_estado = ttk.Entry(top,  font="arial 12 bold" )
-        entry_estado.place(x=120, y=180, width=250, height=30)
+        entry_estado.place(x=120, y=140, width=250, height=30)
         
         self.frameimg = tk.Frame(top, bg='#ffffff', highlightbackground="gray", highlightthickness=1 )
         self.frameimg.place(x=440, y=30, width=200, height=200)
@@ -200,7 +193,6 @@ class Inventario(tk.Frame):
             articulo = entry_articulo.get()
             precio =  entry_precio.get()
             costo =  entry_costo.get()
-            stock =  entry_stock.get()
             estado =  entry_estado.get()
             
             if not articulo or not precio or not costo or not estado:
@@ -210,10 +202,9 @@ class Inventario(tk.Frame):
             try:
                 precio = float(precio)
                 costo = float(costo)
-                stock = int(stock)
                 
             except ValueError:
-                messagebox.showerror("Error", "precio, costo y stock debe ser numeros validos")
+                messagebox.showerror("Error", "precio y costo debe ser numeros validos")
                 return
             
             if hasattr(self, 'image_path'):
@@ -224,7 +215,7 @@ class Inventario(tk.Frame):
                 
             try:
                
-                self.cur.execute("INSERT INTO articulos (articulo, precio, costo, stock, estado, image_path ) VALUES (?, ?, ?, ?, ?, ?)", (articulo, precio, costo, stock, estado, image_path))
+                self.cur.execute("INSERT INTO articulos (articulo, precio, costo, estado, image_path ) VALUES (?, ?, ?, ?, ?)", (articulo, precio, costo, estado, image_path))
                 self.conn.commit()
                 messagebox.showinfo('Exito','Articulo agregado correctamente')
                 top.destroy()
@@ -306,16 +297,15 @@ class Inventario(tk.Frame):
         articulo_seleccionado = self.comboboxbuscar.get()
         
         try:
-            self.cur.execute("SELECT articulo, precio, costo, stock, estado FROM articulos WHERE articulo=?", (articulo_seleccionado,))
+            self.cur.execute("SELECT articulo, precio, costo, estado FROM articulos WHERE articulo=?", (articulo_seleccionado,))
             resultado = self.cur.fetchone()
             
             if resultado is not None:
-                articulo, precio, costo, stock, estado = resultado
+                articulo, precio, costo, estado = resultado
                 
                 self.label1.config(text=f'Articulo: {articulo}')             
                 self.label2.config(text=f'Precio: {precio}$ usd')   
                 # self.label3.config(text=f'Costo-proveedor: {costo}$ usd')   
-                self.label4.config(text=f'Stock: {stock}')  
                  
                 self.label5.config(text=f'Estado: {estado}') 
                 if estado.lower() == "activo":  
@@ -328,7 +318,6 @@ class Inventario(tk.Frame):
                 self.label1.config(text="Articulo: No encontrado")
                 self.label2.config(text="Precio: N/A")
                 # self.label3.config(text="Costo: N/A")
-                self.label4.config(text="Stock: N/A")
                 self.label5.config(text="Estado: N/A")
             
             
@@ -372,7 +361,7 @@ class Inventario(tk.Frame):
             messagebox.showerror("Error", "Selecciona un articulo para editar")
             return
         
-        self.cur.execute("SELECT articulo, precio, costo, stock, estado, image_path FROM articulos WHERE articulo=?",(selcted_item,))
+        self.cur.execute("SELECT articulo, precio, costo, estado, image_path FROM articulos WHERE articulo=?",(selcted_item,))
         resultado = self.cur.fetchall()
         
         if not resultado:
@@ -390,7 +379,7 @@ class Inventario(tk.Frame):
         top.focus_set()
         top.lift()
         print(resultado)
-        articulo, precio, costo, stock, estado, image_path = resultado[0]
+        articulo, precio, costo, estado, image_path = resultado[0]
         
         tk.Label(top, text="Articulo", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=20, width=130, height=25)
         entry_articulo = ttk.Entry(top, font='arial 12 bold')
@@ -410,16 +399,10 @@ class Inventario(tk.Frame):
         entry_costo.insert(0, str(costo) + " $")
         entry_costo.config(justify="center")
         
-        tk.Label(top, text="Stock", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=140, width=130, height=25)
-        entry_stock = ttk.Entry(top, font='arial 12 bold')
-        entry_stock.place(x=160, y=140, width=250, height=30)
-        entry_stock.config(justify="center")
-        entry_stock.insert(0, str(stock) + " unidades disponibles" )
-        
-        tk.Label(top, text="Estado", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=180, width=130, height=25)
+        tk.Label(top, text="Estado", font="arial 12 bold", bg='#C6D9E3').place(x=20, y=140, width=130, height=25)
         
         combo_estado = ttk.Combobox(top, textvariable=estado, values=["Activo", "Inactivo"], font='arial 12 bold', state="readonly") # Solo permite seleccionar, no escribir
-        combo_estado.place(x=160, y=180, width=250, height=30)
+        combo_estado.place(x=160, y=140, width=250, height=30)
         combo_estado.current(0)
 
         combo_estado.config(justify="center")
@@ -444,7 +427,6 @@ class Inventario(tk.Frame):
             nuevo_articulo = entry_articulo.get()
             precio =  entry_precio.get()
             costo =  entry_costo.get()
-            stock =  entry_stock.get()
             estado =  entry_estado.get()
             
             if not nuevo_articulo or not precio or not costo or not estado:
@@ -454,10 +436,9 @@ class Inventario(tk.Frame):
             try:
                 precio = float(precio)
                 costo = float(costo)
-                stock = int(stock)
                 
             except ValueError:
-                messagebox.showerror("Error", "precio, costo y stock debe ser numeros validos")
+                messagebox.showerror("Error", "precio y costo debe ser numeros validos")
                 return
             
             if hasattr(self, 'image_path'):
@@ -467,7 +448,7 @@ class Inventario(tk.Frame):
                 image_path = (r'media/icons/img_default.png')
                 
             # try:
-            self.cur.execute("UPDATE articulos SET articulo=?, precio=?, costo=?, stock=?,image_path=?, estado=? WHERE articulo=?", (nuevo_articulo, precio, costo, stock, image_path, estado, selcted_item))
+            self.cur.execute("UPDATE articulos SET articulo=?, precio=?, costo=?,image_path=?, estado=? WHERE articulo=?", (nuevo_articulo, precio, costo, image_path, estado, selcted_item))
             self.conn.commit()
             self.articulos_combobox()
             self.after(0,lambda: self.cargar_articulos(filtro=nuevo_articulo))

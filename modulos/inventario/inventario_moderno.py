@@ -88,10 +88,6 @@ class InventarioModerno(tk.Frame):
                                   font=ctk.CTkFont(family="Segoe UI", size=12), anchor='w')
         self.label3.pack(pady=5, padx=10, fill='x')
         
-        self.label4 = ctk.CTkLabel(info_frame, text='Stock: --', 
-                                  font=ctk.CTkFont(family="Segoe UI", size=12), anchor='w')
-        self.label4.pack(pady=5, padx=10, fill='x')
-        
         self.label5 = ctk.CTkLabel(info_frame, text='Estado: --', 
                                   font=ctk.CTkFont(family="Segoe UI", size=12), anchor='w')
         self.label5.pack(pady=5, padx=10, fill='x')
@@ -203,11 +199,6 @@ class InventarioModerno(tk.Frame):
         entry_costo = ctk.CTkEntry(main_frame, font=ctk.CTkFont(family="Segoe UI", size=12), width=250)
         entry_costo.place(x=150, y=140)
         
-        ctk.CTkLabel(main_frame, text="Stock Inicial:", 
-                    font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold")).place(x=20, y=180)
-        entry_stock = ctk.CTkEntry(main_frame, font=ctk.CTkFont(family="Segoe UI", size=12), width=250)
-        entry_stock.place(x=150, y=180)
-        
         # Frame para imagen
         self.frameimg = ctk.CTkFrame(main_frame)
         self.frameimg.place(x=450, y=30)
@@ -226,27 +217,25 @@ class InventarioModerno(tk.Frame):
             articulo = entry_articulo.get()
             precio = entry_precio.get()
             costo = entry_costo.get()
-            stock = entry_stock.get()
             
-            if not all([codigo, articulo, precio, costo, stock]):
+            if not all([codigo, articulo, precio, costo]):
                 messagebox.showerror("❌ Error", "Todos los campos deben ser completados")
                 return
             
             try:
                 precio = float(precio)
                 costo = float(costo)
-                stock = int(stock)
             except ValueError:
-                messagebox.showerror("❌ Error", "Precio, costo y stock deben ser números válidos")
+                messagebox.showerror("❌ Error", "Precio y costo deben ser números válidos")
                 return
             
             image_path = getattr(self, 'image_path', 'media/icons/img_default.png')
             
             try:
                 self.cur.execute("""INSERT INTO articulos 
-                               (codigo, articulo, precio, costo, stock, estado, imagen_path) 
-                               VALUES (?, ?, ?, ?, ?, 'activo', ?)""", 
-                               (codigo, articulo, precio, costo, stock, image_path))
+                               (codigo, articulo, precio, costo, estado, imagen_path) 
+                               VALUES (?, ?, ?, ?, 'activo', ?)""", 
+                               (codigo, articulo, precio, costo, image_path))
                 self.conn.commit()
                 messagebox.showinfo('✅ Éxito', 'Producto agregado correctamente')
                 top.destroy()
@@ -345,17 +334,16 @@ class InventarioModerno(tk.Frame):
         articulo_seleccionado = self.comboboxbuscar.get()
         
         try:
-            self.cur.execute("""SELECT codigo, articulo, precio, costo, stock, estado 
+            self.cur.execute("""SELECT codigo, articulo, precio, costo, estado 
                               FROM articulos WHERE articulo=?""", (articulo_seleccionado,))
             resultado = self.cur.fetchone()
             
             if resultado:
-                codigo, articulo, precio, costo, stock, estado = resultado
+                codigo, articulo, precio, costo, estado = resultado
                 
                 self.label1.configure(text=f'📦 Artículo: {articulo}')
                 self.label2.configure(text=f'💰 Precio: ${precio:.2f}')
                 self.label3.configure(text=f'🏷️ Código: {codigo}')
-                self.label4.configure(text=f'📊 Stock: {stock} unidades')
                 
                 if estado.lower() == "activo":
                     self.label5.configure(text=f'✅ Estado: {estado}', text_color=estilos.COLORS['success'])
@@ -365,7 +353,6 @@ class InventarioModerno(tk.Frame):
                 self.label1.configure(text="📦 Artículo: No encontrado")
                 self.label2.configure(text="💰 Precio: --")
                 self.label3.configure(text="🏷️ Código: --")
-                self.label4.configure(text="📊 Stock: --")
                 self.label5.configure(text="❌ Estado: --")
                 
         except sqlite3.Error as e:

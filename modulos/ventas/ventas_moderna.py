@@ -166,9 +166,9 @@ class VentasModerna(tk.Frame):
         self.entry_producto = ttk.Combobox(info_frame, font=('Segoe UI', 11), 
                                         style='Modern.TCombobox', state='normal')
         self.entry_producto.place(x=530, y=18, width=280, height=35)
-        self.entry_producto.bind("<<ComboboxSelected>>", self.actualizar_stock)
+        self.entry_producto.bind("<<ComboboxSelected>>", self.autocompletar_codigo)
         self.entry_producto.bind('<Button-1>', self.mostrar_productos)
-        self.entry_producto.bind('<Return>', self.actualizar_stock)
+        self.entry_producto.bind('<Return>', self.autocompletar_codigo)
 
         # Cantidad
         tk.Label(info_frame, text="🔢 Cantidad:", 
@@ -178,13 +178,7 @@ class VentasModerna(tk.Frame):
         self.entry_cantidad = ttk.Entry(info_frame, font=('Segoe UI', 11), style='Modern.TEntry')
         self.entry_cantidad.place(x=940, y=18, width=100, height=35)
 
-        # ─────────── Fila 2: Stock, Factura, Fecha, Hora ───────────
-
-        # Stock
-        self.label_stock = tk.Label(info_frame, text="📊 Stock: --", 
-                                font=('Segoe UI', 11, 'bold'), bg=self.COLORS['white'],
-                                fg=self.COLORS['success'])
-        self.label_stock.place(x=20, y=80)
+        # ─────────── Fila 2: Factura, Fecha, Hora ───────────
 
         # Número de factura
         tk.Label(info_frame, text="🧾 Factura N°:", 
@@ -347,45 +341,44 @@ class VentasModerna(tk.Frame):
             if count == 0:
                 # No hay artículos, crear algunos de ejemplo
                 productos_ejemplo = [
-                    ("7501234567890", "Producto Ejemplo 1", 10.50, 8.00, 25, "activo", None),
-                    ("7501234567891", "Producto Ejemplo 2", 15.75, 12.00, 30, "activo", None),
-                    ("7501234567892", "Producto Ejemplo 3", 8.25, 6.50, 15, "activo", None),
-                    ("7501234567893", "Producto Ejemplo 4", 22.00, 18.00, 10, "activo", None),
-                    ("7501234567894", "Producto Ejemplo 5", 12.99, 10.00, 20, "activo", None)
+                    ("7501234567890", "Producto Ejemplo 1", 10.50, 8.00, "activo", None),
+                    ("7501234567891", "Producto Ejemplo 2", 15.75, 12.00, "activo", None),
+                    ("7501234567892", "Producto Ejemplo 3", 8.25, 6.50, "activo", None),
+                    ("7501234567893", "Producto Ejemplo 4", 22.00, 18.00, "activo", None),
+                    ("7501234567894", "Producto Ejemplo 5", 12.99, 10.00, "activo", None)
                 ]
                 
-                c.executemany("INSERT INTO articulos (codigo, articulo, precio, costo, stock, estado, imagen_path) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                c.executemany("INSERT INTO articulos (codigo, articulo, precio, costo, estado, imagen_path) VALUES (?, ?, ?, ?, ?, ?)", 
                              productos_ejemplo)
                 conn.commit()
                 print("Artículos de ejemplo creados con códigos de barras")
             
             # Cargar productos de ambas tablas (articulos primero, luego productos),
             # combinar sin duplicados para que todo lo agregado aparezca en el combobox
-            c.execute("SELECT codigo, articulo, precio, stock FROM articulos WHERE stock > 0 AND estado = 'activo'")
+            c.execute("SELECT codigo, articulo, precio FROM articulos WHERE estado = 'activo'")
             productos_data = c.fetchall()
             
             try:
-                c.execute("SELECT codigo, nombre, precio, stock FROM productos WHERE stock > 0")
+                c.execute("SELECT codigo, nombre, precio FROM productos")
                 codigos_vistos = {p[0] for p in productos_data if p[0]}
-                for codigo, nombre, precio, stock in c.fetchall():
+                for codigo, nombre, precio in c.fetchall():
                     if codigo and codigo not in codigos_vistos:
-                        productos_data.append((codigo, nombre, precio, stock))
+                        productos_data.append((codigo, nombre, precio))
             except sqlite3.Error:
                 pass
             
             print(f"🔍 Productos encontrados: {len(productos_data)}")
             
             # Crear listas para autocompletado
-            self.productos_dict = {}  # codigo: {nombre, precio, stock}
+            self.productos_dict = {}  # codigo: {nombre, precio}
             self.productos_nombres = []
             self.productos_codigos = []
             
-            for codigo, nombre, precio, stock in productos_data:
+            for codigo, nombre, precio in productos_data:
                 if codigo:  # Solo si tiene código de barras
                     self.productos_dict[codigo] = {
                         'nombre': nombre,
-                        'precio': precio,
-                        'stock': stock
+                        'precio': precio
                     }
                     self.productos_nombres.append(f"{nombre} ({codigo})")
                     self.productos_codigos.append(codigo)
@@ -409,7 +402,7 @@ class VentasModerna(tk.Frame):
                 if hasattr(self, 'entry_producto'):
                     try:
                         self.entry_producto['values'] = self.productos_nombres
-                        print("❌ No se encontraron productos con stock")
+                        print("❌ No se encontraron productos disponibles")
                     except Exception as e:
                         print(f"❌ Error configurando combobox vacío: {e}")
                 
@@ -435,8 +428,6 @@ class VentasModerna(tk.Frame):
         self.entry_codigo.delete(0, tk.END)
         self.entry_cantidad.delete(0, tk.END)
         total = len(getattr(self, 'productos_nombres', []))
-        self.label_stock.config(text=f"🔄 Inventario actualizado: {total} productos",
-                                fg=self.COLORS['secondary'])
         if mostrar_mensaje:
             messagebox.showinfo("🔄 Actualizado",
                                 f"Información de venta actualizada correctamente.\n"
@@ -459,8 +450,8 @@ class VentasModerna(tk.Frame):
             if hasattr(self, 'productos_nombres'):
                 self.entry_producto['values'] = self.productos_nombres
 
-    def actualizar_stock(self, event=None):
-        """Actualizar el stock del producto seleccionado"""
+    def autocompletar_codigo(self, event=None):
+        """Autocompletar el código del producto seleccionado"""
         try:
             producto_seleccionado = self.entry_producto.get()
             if not producto_seleccionado:
@@ -472,26 +463,13 @@ class VentasModerna(tk.Frame):
                     codigo = producto_seleccionado.split('(')[-1].replace(')', '')
                     
                     if codigo in self.productos_dict:
-                        producto_info = self.productos_dict[codigo]
-                        stock = producto_info['stock']
-                        
                         # Actualizar campo de código sin causar recursión
                         self.entry_codigo.delete(0, tk.END)
                         self.entry_codigo.insert(0, codigo)
-                        
-                        # Actualizar stock
-                        self.label_stock.config(
-                            text=f"📊 Stock: {stock} unidades",
-                            fg=self.COLORS['success'] if stock > 10 else self.COLORS['warning']
-                        )
                         return
             
-            # Método alternativo si no hay productos_dict
-            self.label_stock.config(text="📊 Stock: --", fg=self.COLORS['dark'])
-            
         except Exception as e:
-            print(f"Error actualizando stock: {e}")
-            self.label_stock.config(text="📊 Stock: --", fg=self.COLORS['dark'])
+            print(f"Error autocompletando código: {e}")
 
     def agregar_producto(self):
         """Agregar producto a la lista de venta"""
@@ -532,25 +510,25 @@ class VentasModerna(tk.Frame):
             if codigo:
                 # Buscar primero en productos, luego en articulos
                 print(f"🔍 Buscando en productos con código: '{codigo}'")
-                c.execute("SELECT nombre, precio, stock FROM productos WHERE codigo = ?", (codigo,))
+                c.execute("SELECT nombre, precio FROM productos WHERE codigo = ?", (codigo,))
                 resultado = c.fetchone()
                 print(f"📊 Resultado en productos: {resultado}")
                 
                 if not resultado:
                     print(f"🔍 Buscando en articulos con código: '{codigo}'")
-                    c.execute("SELECT articulo, precio, stock FROM articulos WHERE codigo = ? AND estado = 'activo'", (codigo,))
+                    c.execute("SELECT articulo, precio FROM articulos WHERE codigo = ? AND estado = 'activo'", (codigo,))
                     resultado = c.fetchone()
                     print(f"📊 Resultado en articulos: {resultado}")
             else:
                 # Buscar primero en productos, luego en articulos
                 print(f"🔍 Buscando en productos con nombre: '{nombre_producto}'")
-                c.execute("SELECT nombre, precio, stock FROM productos WHERE nombre = ?", (nombre_producto,))
+                c.execute("SELECT nombre, precio FROM productos WHERE nombre = ?", (nombre_producto,))
                 resultado = c.fetchone()
                 print(f"📊 Resultado en productos: {resultado}")
                 
                 if not resultado:
                     print(f"🔍 Buscando en articulos con nombre: '{nombre_producto}'")
-                    c.execute("SELECT articulo, precio, stock FROM articulos WHERE articulo = ? AND estado = 'activo'", (nombre_producto,))
+                    c.execute("SELECT articulo, precio FROM articulos WHERE articulo = ? AND estado = 'activo'", (nombre_producto,))
                     resultado = c.fetchone()
                     print(f"📊 Resultado en articulos: {resultado}")
             
@@ -560,11 +538,7 @@ class VentasModerna(tk.Frame):
                 conn.close()
                 return
                 
-            nombre_real, precio, stock = resultado
-            
-            if cantidad > stock:
-                messagebox.showerror("📦 Stock Insuficiente", f"Solo hay {stock} unidades disponibles")
-                return
+            nombre_real, precio = resultado
             
             total = precio * cantidad
             
@@ -583,7 +557,6 @@ class VentasModerna(tk.Frame):
             self.entry_producto.delete(0, tk.END)
             self.entry_codigo.delete(0, tk.END)
             self.entry_cantidad.delete(0, tk.END)
-            self.label_stock.config(text="📊 Stock: --")
             
             # Actualizar totales
             self.actualizar_totales()
@@ -613,7 +586,6 @@ class VentasModerna(tk.Frame):
         
         self.entry_producto.set("")
         self.entry_cantidad.delete(0, tk.END)
-        self.label_stock.config(text="📊 Stock: --")
         self.actualizar_totales()
 
     def realizar_pago(self):
@@ -951,7 +923,6 @@ class VentasModerna(tk.Frame):
             
             if not codigo:
                 self.entry_producto.set("")
-                self.label_stock.config(text="📊 Stock: --")
                 return
             
             if not hasattr(self, 'productos_codigos') or not hasattr(self, 'productos_dict'):
@@ -972,11 +943,6 @@ class VentasModerna(tk.Frame):
                 self.entry_producto.delete(0, tk.END)
                 self.entry_producto.insert(0, nombre_completo)
                 
-                self.label_stock.config(
-                    text=f"📊 Stock: {producto_info['stock']} unidades",
-                    fg=self.COLORS['success'] if producto_info['stock'] > 10 else self.COLORS['warning']
-                )
-                
                 # Si presionó Enter, enfocar cantidad
                 if event and event.keysym == 'Return':
                     self.entry_cantidad.focus_set()
@@ -984,7 +950,6 @@ class VentasModerna(tk.Frame):
                 # Limpiar si no encuentra
                 if len(codigo) > 2:  # Solo limpiar si escribió algo significativo
                     self.entry_producto.delete(0, tk.END)
-                    self.label_stock.config(text="📊 Stock: -- (Código no encontrado)", fg=self.COLORS['danger'])
                     
         except Exception as e:
             print(f"Error buscando por código: {e}")
@@ -1018,7 +983,7 @@ class VentasModerna(tk.Frame):
             # Si hay solo una coincidencia exacta, seleccionarla
             if len(productos_filtrados) == 1:
                 self.entry_producto.set(productos_filtrados[0])
-                self.actualizar_stock()
+                self.autocompletar_codigo()
         else:
             if hasattr(self, 'productos_nombres'):
                 self.entry_producto['values'] = self.productos_nombres
@@ -1303,9 +1268,6 @@ class VentasModerna(tk.Frame):
                     print(f"  ✅ Detalle insertado para: {producto['nombre']}")
                 except sqlite3.Error as e:
                     print(f"  ❌ Error insertando detalle para {producto['nombre']}: {e}")
-                
-                # Actualizar stock del producto
-                self.actualizar_stock_producto(c, producto['nombre'], producto['cantidad'])
             
             conn.commit()
             conn.close()
@@ -1319,22 +1281,6 @@ class VentasModerna(tk.Frame):
                 conn.rollback()
                 conn.close()
             return None
-    
-    def actualizar_stock_producto(self, cursor, nombre_producto, cantidad_vendida):
-        """Actualizar stock del producto después de la venta"""
-        try:
-            # Actualizar en tabla productos
-            cursor.execute("UPDATE productos SET stock = stock - ? WHERE nombre = ?", 
-                         (cantidad_vendida, nombre_producto))
-            
-            # Actualizar en tabla articulos también
-            cursor.execute("UPDATE articulos SET stock = stock - ? WHERE articulo = ?", 
-                         (cantidad_vendida, nombre_producto))
-            
-            print(f"📦 Stock actualizado para {nombre_producto}: -{cantidad_vendida}")
-            
-        except Exception as e:
-            print(f"⚠️ Error actualizando stock: {e}")
     
     def imprimir_ticket(self, venta_id, total, monto_recibido, cambio):
         """Generar e imprimir ticket de venta"""
@@ -1463,67 +1409,35 @@ ID Venta: {venta_id}
     def generar_factura_fiscal(self, venta_id, total, monto_recibido, cambio):
         """Generar formato de factura fiscal"""
         fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
-        hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
-        
+
         # Obtener datos de la empresa desde la configuración
         from modulos.configuracion.gestor_configuracion import obtener_configuracion
         nombre_empresa = obtener_configuracion('nombre_empresa', 'El Goloso')
-        direccion_empresa = obtener_configuracion('direccion_empresa', 'Caracas, Venezuela')
         rif_empresa = obtener_configuracion('rif_empresa', 'J-00000000-0')
-        telefono_empresa = obtener_configuracion('telefono_empresa', '+58-212-1234567')
-        
+
         factura = f"""
-{'='*50}
-              FACTURA FISCAL
-{'='*50}
 
-{nombre_empresa}
+
+{nombre_empresa.upper()}
 RIF: {rif_empresa}
-{direccion_empresa}
 
-FACTURA N°: {self.numero_factura:08d}
 FECHA: {fecha_actual}
-HORA: {hora_actual}
-CAJERO: Sistema POS
 
-{'='*50}
-
-DESCRIPCIÓN                QTY    P.UNIT    TOTAL
-{'='*50}
+{'Cantidad':<10}{'Descrip.':<20}{'P.U':>10}{'Importe':>10}
 """
-        
+
         for producto in self.productos_seleccionados:
-            nombre = producto['nombre'][:20].ljust(20)
-            cantidad = str(producto['cantidad']).rjust(3)
-            precio = f"${producto['precio']:>7.2f}"
-            subtotal = f"${producto['total']:>9.2f}"
-            
-            factura += f"{nombre} {cantidad} {precio} {subtotal}\n"
-        
-        subtotal_venta = sum(p['total'] for p in self.productos_seleccionados)
-        iva = subtotal_venta * 0.19
-        
+            cantidad = str(producto['cantidad'])
+            nombre = producto['nombre'][:18]
+            precio = f"${producto['precio']:,.2f}"
+            importe = f"${producto['total']:,.2f}"
+
+            factura += f"{cantidad:<10}{nombre:<20}{precio:>10}{importe:>10}\n"
+
         factura += f"""
-{'='*50}
-SUBTOTAL:                           ${subtotal_venta:>9.2f}
-IVA (19%):                          ${iva:>9.2f}
-{'='*50}
-TOTAL A PAGAR:                      ${total:>9.2f}
 
-EFECTIVO RECIBIDO:                  ${monto_recibido:>9.2f}
-CAMBIO:                             ${cambio:>9.2f}
 
-{'='*50}
-           GRACIAS POR SU COMPRA
-        CONSERVE ESTA FACTURA FISCAL
-{'='*50}
-
-CONTROL FISCAL: {venta_id:08d}
-SERIAL IMPRESORA: FIS-001-2024
-FECHA SISTEMA: {datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")}
-
-Esta es una factura fiscal válida
-según normativas SENIAT
+Total: ${total:,.2f}
 """
         return factura
 

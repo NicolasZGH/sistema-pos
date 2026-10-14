@@ -321,18 +321,14 @@ Fecha: {datetime.now().strftime('%Y-%m-%d')}"""
             conn = sqlite3.connect('database.db')
             cursor = conn.cursor()
             
-            # Stock total
-            cursor.execute("SELECT SUM(stock) FROM productos")
-            stock_total = cursor.fetchone()[0] or 0
-            
-            # Productos con stock bajo (menos de 10)
-            cursor.execute("SELECT COUNT(*) FROM productos WHERE stock < 10")
-            stock_bajo = cursor.fetchone()[0]
+            # Total de productos
+            cursor.execute("SELECT COUNT(*) FROM productos")
+            total_productos = cursor.fetchone()[0]
             
             conn.close()
             
             # Mostrar resumen
-            resumen_text = f"📊 Stock Total: {stock_total}\n⚠️ Stock Bajo: {stock_bajo} productos"
+            resumen_text = f"📦 Productos en inventario: {total_productos}"
             
             resumen_label = tk.Label(self.inventario_frame, text=resumen_text, 
                                     font=('Segoe UI', 10, 'bold'), 
@@ -395,7 +391,6 @@ Fecha: {datetime.now().strftime('%Y-%m-%d')}"""
 ✨ Características:
 • Gestión de inventario
 • Interfaz moderna y responsive
-• Actualización automática de stock
 
 👨‍💻 Desarrollado con estilos modernos
 📅 Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M')}

@@ -230,11 +230,8 @@ TOTAL GENERAL: ${total_ventas:.2f}
             conn = sqlite3.connect('database.db')
             cursor = conn.cursor()
             
-            cursor.execute("SELECT * FROM productos ORDER BY nombre")
+            cursor.execute("SELECT codigo, nombre, precio, estado FROM productos ORDER BY nombre")
             productos = cursor.fetchall()
-            
-            valor_total = sum(p[3] * p[5] for p in productos)  # precio * stock
-            productos_bajo_stock = [p for p in productos if p[5] < 10]
             
             reporte = f"""
 ╔══════════════════════════════════════════════════════════════╗
@@ -246,34 +243,19 @@ TOTAL GENERAL: ${total_ventas:.2f}
 📈 RESUMEN EJECUTIVO:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 • Total de Productos: {len(productos)}
-• Valor Total del Inventario: ${valor_total:.2f}
-• Productos con Stock Bajo (<10): {len(productos_bajo_stock)}
-• Stock Total: {sum(p[5] for p in productos)} unidades
 
 📋 INVENTARIO DETALLADO:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{'Código':<15} {'Producto':<30} {'Stock':<8} {'Precio':<10} {'Valor':<12} {'Estado':<10}
-{'-'*15} {'-'*30} {'-'*8} {'-'*10} {'-'*12} {'-'*10}
+{'Código':<15} {'Producto':<30} {'Precio':<10} {'Estado':<10}
+{'-'*15} {'-'*30} {'-'*10} {'-'*10}
 """
             
-            for producto in productos:
-                codigo = str(producto[1]) if producto[1] else 'N/A'
-                nombre = str(producto[2])[:30]
-                stock = producto[5]
-                precio = producto[3]
-                valor = precio * stock
-                estado = "⚠️ BAJO" if stock < 10 else "✅ OK"
+            for codigo, nombre, precio, estado in productos:
+                codigo = str(codigo) if codigo else 'N/A'
+                nombre = str(nombre)[:30]
+                estado = str(estado) if estado else 'N/A'
                 
-                reporte += f"{codigo:<15} {nombre:<30} {stock:<8} ${precio:<9.2f} ${valor:<11.2f} {estado:<10}\n"
-            
-            if productos_bajo_stock:
-                reporte += f"""
-
-⚠️ PRODUCTOS CON STOCK BAJO:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-"""
-                for producto in productos_bajo_stock:
-                    reporte += f"• {producto[2]} - Stock: {producto[5]} unidades\n"
+                reporte += f"{codigo:<15} {nombre:<30} ${precio:<9.2f} {estado:<10}\n"
             
             reporte += f"""
 

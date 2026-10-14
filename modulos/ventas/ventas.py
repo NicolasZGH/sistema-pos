@@ -128,16 +128,13 @@ class Ventas(tk.Frame):
         try:
             conn = sqlite3.connect(self.db_name)
             c = conn.cursor()
-            c.execute("SELECT precio, costo, stock FROM articulos WHERE articulo=?",(producto,))
+            c.execute("SELECT precio, costo FROM articulos WHERE articulo=?",(producto,))
             resultado = c.fetchone()
 
             if resultado is None:
                 messagebox.showerror("Error","Producto no encontrado")
                 return
-            precio, costo, stock = resultado
-
-            if cantidad > stock:
-                messagebox.showerror("Error", f"Stock insuficiente. Solo hay {stock} unidades disponiobles.")
+            precio, costo = resultado
 
             total = precio * cantidad
             total_cop = "{:,.0f}".format(total)
@@ -162,24 +159,6 @@ class Ventas(tk.Frame):
         total_pagar_cop = "{:,.0f}".format(total_pagar)
         self.label_precio_total.config(text=f"Precio a Pagar: $ {total_pagar_cop}")
     
-    #---------------------------------------------------------------------------------
-
-    def actualizar_stock(self, event=None):
-        producto_seleccionado = self.entry_producto.get()
-
-        try :
-
-            conn = sqlite3.connect(self.db_name)
-            c = conn.cursor()
-            c.execute('SELECT stock FROM articulos WHERE articulo=?',(producto_seleccionado,))
-            stock = c.fetchone()[0]
-            conn.close()
-
-            self.label_stock.config(text=f"Stock: {stock}")
-
-        except sqlite3.Error as e:
-            print("Error al obtener el stock del producto: ", e)
-        
     #---------------------------------------------------------------------------------
     
     def realizar_pago(self):
@@ -244,7 +223,6 @@ class Ventas(tk.Frame):
                 factura, cliente, producto, precio, cantidad, total, costo = item
                 c.execute("INSERT INTO ventas (factura, cliente, articulo, precio, cantidad, total, costo, fecha, hora) VALUES (?,?,?,?,?,?,?,?,?)",
                           (factura, cliente, producto, precio, cantidad, total.replace(" ", "").replace(",",""), costo * cantidad, fecha_actual, hora_actual))
-                c.execute("UPDATE articulos SET stock = stock - ? WHERE articulo = ?", (cantidad, producto))
             
             conn.commit()
             generar_factura(total_venta, cliente)
@@ -316,18 +294,14 @@ class Ventas(tk.Frame):
                 try:
                     conn = sqlite3.connect(self.db_name)
                     c = conn.cursor()
-                    c.execute("SELECT precio, costo, stock FROM articulos WHERE articulo=?", (current_producto,))
+                    c.execute("SELECT precio, costo FROM articulos WHERE articulo=?", (current_producto,))
                     resultado = c.fetchone()
 
                     if resultado is None:
                         messagebox.showerror("Error", "Producto no encontrado")
                         
-                    precio, costo, stock = resultado
+                    precio, costo = resultado
 
-                    if new_cantidad > stock:
-                        messagebox.showerror("Error", f"Stock insuficiente. Solo hay {stock} unidades disponibles")
-                        return
-                
                     total = precio * new_cantidad
                     total_cop = "{:,.0f}".format(total)
 
@@ -485,10 +459,6 @@ class Ventas(tk.Frame):
         label_cantidad.place(x=500, y=11)
         self.entry_cantidad = ttk.Entry(labelframe, font="sans 14 bold")
         self.entry_cantidad.place(x=610, y=8, width=100, height=40)
-        
-        self.label_stock = tk.Label(labelframe, text="Stock: ", font='sans 14 bold', bg='#C6D9E3')
-        self.label_stock.place(x=500, y=70)
-        self.entry_producto.bind("<<ComboboxSelected>>", self.actualizar_stock)
         
         label_factura = tk.Label(labelframe, text="Numero de Factura: ", font='sans 14 bold', bg='#C6D9E3')
         label_factura.place(x=750, y=11)

@@ -119,15 +119,10 @@ class InventarioSimple(tk.Frame):
                               bg=estilos.COLORS['white'])
         self.label3.place(x=5, y=75)
         
-        self.label4 = tk.Label(info_frame, text='Stock: --', 
-                              font=('Segoe UI', 12, 'bold'), 
-                              bg=estilos.COLORS['white'])
-        self.label4.place(x=5, y=110)
-        
         self.label5 = tk.Label(info_frame, text='Estado: --', 
                               font=('Segoe UI', 12, 'bold'), 
                               bg=estilos.COLORS['white'])
-        self.label5.place(x=5, y=145)
+        self.label5.place(x=5, y=110)
         
         # Frame de botones con CustomTkinter
         buttons_frame = tk.LabelFrame(self, text="⚙️ Opciones", 
@@ -235,12 +230,6 @@ class InventarioSimple(tk.Frame):
         entry_costo = tk.Entry(main_frame, font=('Segoe UI', 12), width=30)
         entry_costo.place(x=180, y=140)
         
-        tk.Label(main_frame, text="Stock Inicial:", 
-                font=('Segoe UI', 12, 'bold'), 
-                bg=estilos.COLORS['white']).place(x=20, y=180)
-        entry_stock = tk.Entry(main_frame, font=('Segoe UI', 12), width=30)
-        entry_stock.place(x=180, y=180)
-        
         # Frame para imagen
         self.frameimg = tk.Frame(main_frame, bg='lightgray', relief='solid', bd=1)
         self.frameimg.place(x=480, y=30, width=180, height=180)
@@ -260,24 +249,22 @@ class InventarioSimple(tk.Frame):
             articulo = entry_articulo.get().strip()
             precio = entry_precio.get().strip()
             costo = entry_costo.get().strip()
-            stock = entry_stock.get().strip()
             
             # Validaciones
-            if not all([codigo, articulo, precio, costo, stock]):
+            if not all([codigo, articulo, precio, costo]):
                 messagebox.showerror("❌ Error", "Todos los campos deben ser completados")
                 return
             
             try:
                 precio_float = float(precio)
                 costo_float = float(costo)
-                stock_int = int(stock)
                 
-                if precio_float <= 0 or costo_float <= 0 or stock_int < 0:
+                if precio_float <= 0 or costo_float <= 0:
                     messagebox.showerror("❌ Error", "Los valores deben ser positivos")
                     return
                     
             except ValueError:
-                messagebox.showerror("❌ Error", "Precio, costo y stock deben ser números válidos")
+                messagebox.showerror("❌ Error", "Precio y costo deben ser números válidos")
                 return
             
             # Verificar si el código ya existe
@@ -295,9 +282,9 @@ class InventarioSimple(tk.Frame):
             try:
                 # Insertar el nuevo producto
                 self.cur.execute("""INSERT INTO articulos 
-                               (codigo, articulo, precio, costo, stock, estado, imagen_path) 
-                               VALUES (?, ?, ?, ?, ?, 'activo', ?)""", 
-                               (codigo, articulo, precio_float, costo_float, stock_int, imagen_path))
+                               (codigo, articulo, precio, costo, estado, imagen_path) 
+                               VALUES (?, ?, ?, ?, 'activo', ?)""", 
+                               (codigo, articulo, precio_float, costo_float, imagen_path))
                 self.conn.commit()
                 
                 messagebox.showinfo('✅ Éxito', f'Producto "{articulo}" agregado correctamente')
@@ -380,7 +367,7 @@ class InventarioSimple(tk.Frame):
         
         # Obtener datos del producto
         try:
-            self.cur.execute("""SELECT codigo, articulo, precio, costo, stock, estado, imagen_path 
+            self.cur.execute("""SELECT codigo, articulo, precio, costo, estado, imagen_path 
                               FROM articulos WHERE articulo=?""", (producto_seleccionado,))
             resultado = self.cur.fetchone()
             
@@ -388,7 +375,7 @@ class InventarioSimple(tk.Frame):
                 messagebox.showerror("❌ Error", "Producto no encontrado")
                 return
                 
-            codigo_actual, articulo_actual, precio_actual, costo_actual, stock_actual, estado_actual, imagen_actual = resultado
+            codigo_actual, articulo_actual, precio_actual, costo_actual, estado_actual, imagen_actual = resultado
             
         except sqlite3.Error as e:
             messagebox.showerror("❌ Error", f"Error al obtener datos del producto: {e}")
@@ -446,22 +433,15 @@ class InventarioSimple(tk.Frame):
         entry_costo.place(x=180, y=140)
         entry_costo.insert(0, str(costo_actual))
         
-        tk.Label(main_frame, text="Stock:", 
-                font=('Segoe UI', 12, 'bold'), 
-                bg=estilos.COLORS['white']).place(x=20, y=180)
-        entry_stock = tk.Entry(main_frame, font=('Segoe UI', 12), width=30)
-        entry_stock.place(x=180, y=180)
-        entry_stock.insert(0, str(stock_actual))
-        
         tk.Label(main_frame, text="Estado:", 
                 font=('Segoe UI', 12, 'bold'), 
-                bg=estilos.COLORS['white']).place(x=20, y=220)
+                bg=estilos.COLORS['white']).place(x=20, y=180)
         
         # Combobox para estado
         from tkinter import ttk
         combo_estado = ttk.Combobox(main_frame, values=["activo", "inactivo"], 
                                    font=('Segoe UI', 12), state="readonly", width=28)
-        combo_estado.place(x=180, y=220)
+        combo_estado.place(x=180, y=180)
         combo_estado.set(estado_actual)
         
         # Frame para imagen
@@ -536,25 +516,23 @@ class InventarioSimple(tk.Frame):
             articulo = entry_articulo.get().strip()
             precio = entry_precio.get().strip()
             costo = entry_costo.get().strip()
-            stock = entry_stock.get().strip()
             estado = combo_estado.get()
             
             # Validaciones
-            if not all([codigo, articulo, precio, costo, stock, estado]):
+            if not all([codigo, articulo, precio, costo, estado]):
                 messagebox.showerror("❌ Error", "Todos los campos deben ser completados")
                 return
             
             try:
                 precio_float = float(precio)
                 costo_float = float(costo)
-                stock_int = int(stock)
                 
-                if precio_float <= 0 or costo_float <= 0 or stock_int < 0:
+                if precio_float <= 0 or costo_float <= 0:
                     messagebox.showerror("❌ Error", "Los valores deben ser positivos")
                     return
                     
             except ValueError:
-                messagebox.showerror("❌ Error", "Precio, costo y stock deben ser números válidos")
+                messagebox.showerror("❌ Error", "Precio y costo deben ser números válidos")
                 return
             
             # Verificar si el código cambió y ya existe
@@ -574,9 +552,9 @@ class InventarioSimple(tk.Frame):
             try:
                 # Actualizar el producto
                 self.cur.execute("""UPDATE articulos 
-                               SET codigo=?, articulo=?, precio=?, costo=?, stock=?, estado=?, imagen_path=?
+                               SET codigo=?, articulo=?, precio=?, costo=?, estado=?, imagen_path=?
                                WHERE articulo=?""", 
-                               (codigo, articulo, precio_float, costo_float, stock_int, estado, imagen_path, producto_seleccionado))
+                               (codigo, articulo, precio_float, costo_float, estado, imagen_path, producto_seleccionado))
                 self.conn.commit()
                 
                 messagebox.showinfo('✅ Éxito', f'Producto "{articulo}" actualizado correctamente')
@@ -615,7 +593,6 @@ class InventarioSimple(tk.Frame):
                     self.label1.config(text="📦 Artículo: --")
                     self.label2.config(text="💰 Precio: --")
                     self.label3.config(text="🏷️ Código: --")
-                    self.label4.config(text="📊 Stock: --")
                     self.label5.config(text="❌ Estado: --")
                     
                 except sqlite3.Error as e:
@@ -990,17 +967,16 @@ class InventarioSimple(tk.Frame):
         articulo_seleccionado = self.comboboxbuscar.get()
         
         try:
-            self.cur.execute("""SELECT codigo, articulo, precio, costo, stock, estado 
+            self.cur.execute("""SELECT codigo, articulo, precio, costo, estado 
                               FROM articulos WHERE articulo=?""", (articulo_seleccionado,))
             resultado = self.cur.fetchone()
             
             if resultado:
-                codigo, articulo, precio, costo, stock, estado = resultado
+                codigo, articulo, precio, costo, estado = resultado
                 
                 self.label1.config(text=f'📦 Artículo: {articulo}')
                 self.label2.config(text=f'💰 Precio: ${precio:.2f}')
                 self.label3.config(text=f'🏷️ Código: {codigo}')
-                self.label4.config(text=f'📊 Stock: {stock} unidades')
                 
                 if estado.lower() == "activo":
                     self.label5.config(text=f'✅ Estado: {estado}', fg=estilos.COLORS['success'])
@@ -1010,7 +986,6 @@ class InventarioSimple(tk.Frame):
                 self.label1.config(text="📦 Artículo: No encontrado")
                 self.label2.config(text="💰 Precio: --")
                 self.label3.config(text="🏷️ Código: --")
-                self.label4.config(text="📊 Stock: --")
                 self.label5.config(text="❌ Estado: --")
                 
         except sqlite3.Error as e:

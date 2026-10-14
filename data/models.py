@@ -14,7 +14,6 @@ def crear_base_de_datos():
                 articulo TEXT NOT NULL,
                 precio REAL NOT NULL,
                 costo REAL NOT NULL,
-                stock INTEGER NOT NULL,
                 estado TEXT NOT NULL,
                 imagen_path TEXT
             )
